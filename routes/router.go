@@ -10,9 +10,9 @@ func Router() *mux.Router{
 
 	//routes for customer handling
 	router.HandleFunc("/api/createcustomer",middleware.CreateCustomer).Methods("POST","OPTIONS")
-	// router.HandleFunc("/api/updatecustomer",middleware.UpdateCustomer).Methods("PUT","OPTIONS")
-	// router.HandleFunc("/api/deletecustomer",middleware.DeleteCustomer).Methods("DELETE","OPTIONS")
-	// router.HandleFunc("/api/listcustomers",middleware.ListCustomers).Methods("GET","OPTIONS")
+	router.HandleFunc("/api/updatecustomer",middleware.UpdateCustomer).Methods("PUT","OPTIONS")
+	router.HandleFunc("/api/deletecustomer{id}",middleware.DeleteCustomer).Methods("DELETE","OPTIONS")
+	router.HandleFunc("/api/listcustomers",middleware.ListCustomers).Methods("GET","OPTIONS")
 	router.HandleFunc("/api/customerbyId/{id}",middleware.CustomerbyId).Methods("GET","OPTIONS")
 
 	// //routes for transaction
