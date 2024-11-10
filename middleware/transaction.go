@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
+	// "time"
 	"transhabit/models"
 	"github.com/gorilla/mux"
 )
@@ -20,9 +20,9 @@ func AddTransaction(w http.ResponseWriter,r *http.Request){
 
 	json.NewDecoder(r.Body).Decode(&trans)
 
-	statement:= "INSERT INTO transaction (userid,amount,category,type,time) values ($1,$2,$3,$4,$5)"
+	statement:= "INSERT INTO transaction (user_id,acc_id,amount,cat_id,type_id,description) values ($1,$2,$3,$4,$5,$6)"
 
-	res,err:=db.Exec(statement,trans.Userid,trans.Amount,trans.Category,trans.Type,time.Now())
+	res,err:=db.Exec(statement,trans.Userid,trans.Acc_id,trans.Amount,trans.Category,trans.Type,trans.Description)
 
 	if err!=nil{
 		log.Fatalf("error executing query- %v",err)
@@ -54,16 +54,16 @@ func TransactionbyId(w http.ResponseWriter,r *http.Request){
 		log.Fatalf("error while input convert -%v",err)
 	}
 
-	statement:="SELECT * FROM transaction WHERE id=$1"
+	statement:="SELECT * FROM transaction WHERE t_id=$1"
 
 	row:=db.QueryRow(statement,in)
 
 	if err!=nil{
 		log.Fatalf("error occured during querying- %v",err)
 	}
-	var trans models.Transaction
+	var trans models.TransactionData
 
-	errors:=row.Scan(&trans.Id,&trans.Userid,&trans.Amount,&trans.Category,&trans.Type,&trans.Time)
+	errors:=row.Scan(&trans.Trans_id,&trans.Userid,&trans.Acc_id,&trans.Amount,&trans.Category,&trans.Type,&trans.Description,&trans.Time)
 
 	if errors!=nil{
 		log.Fatalf("error while converting data -%v",errors)
@@ -85,12 +85,12 @@ func ListTransactions(w http.ResponseWriter,r *http.Request){
 		log.Fatalf("error occured while querying -%v",err)
 	}
 
-	var transactions []models.Transaction
+	var transactions []models.TransactionData
 
 	for rows.Next(){
-		var trans models.Transaction
+		var trans models.TransactionData
 
-		err:=rows.Scan(&trans.Id,&trans.Userid,&trans.Amount,&trans.Category,&trans.Type,&trans.Time)
+		err:=rows.Scan(&trans.Trans_id,&trans.Userid,&trans.Acc_id,&trans.Amount,&trans.Category,&trans.Type,&trans.Description,&trans.Time)
 
 		if err!=nil{
 			log.Fatalf("error while loading each row - %v",err)

@@ -24,9 +24,9 @@ func CreateCustomer(w http.ResponseWriter, r *http.Request ){
 
 	json.NewDecoder(r.Body).Decode(&cus)
 
-	statement:= "INSERT INTO customer (name,place, age, occupation,balance) values ($1,$2,$3,$4,$5)"
+	statement:= "INSERT INTO customer (name,email,phone,password,place,dob,occupation) values ($1,$2,$3,$4,$5,$6,$7)"
 
-	res,err:=db.Exec(statement,cus.Name,cus.Place,cus.Age,cus.Occupation,cus.Balance)
+	res,err:=db.Exec(statement,cus.Name,cus.Email,cus.Phone,cus.Place,cus.Dob,cus.Occupation)
 
 	if err!=nil{
 		log.Fatalf("error executing query- %v",err)
@@ -58,16 +58,16 @@ func CustomerbyId(w http.ResponseWriter,r *http.Request){
 		log.Fatalf("error while input convert -%v",err)
 	}
 
-	statement:="SELECT * FROM customer WHERE id=$1"
+	statement:="SELECT user_id,name,email,phone,place,dob,occupation FROM customer WHERE user_id=$1"
 
 	row:=db.QueryRow(statement,in)
 
 	if err!=nil{
 		log.Fatalf("error occured during querying- %v",err)
 	}
-	var cus models.Customer
+	var cus models.CustomerData
 
-	errors:=row.Scan(&cus.Id,&cus.Name,&cus.Place,&cus.Age,&cus.Occupation,&cus.Balance)
+	errors:=row.Scan(&cus.Userid,&cus.Name,&cus.Email,&cus.Phone,&cus.Place,&cus.Dob,&cus.Occupation)
 
 	if errors!=nil{
 		log.Fatalf("error while converting data -%v",errors)
@@ -82,7 +82,7 @@ func ListCustomers(w http.ResponseWriter, r *http.Request){
 	db:=ConnectDB()
 	defer db.Close()
 
-	statement:="SELECT * FROM customer"
+	statement:="SELECT user_id,name,email,phone,place,dob,occupation FROM customer"
 
 	rows,err:=db.Query(statement)
 
@@ -90,12 +90,12 @@ func ListCustomers(w http.ResponseWriter, r *http.Request){
 		log.Fatalf("error occured while querying -%v",err)
 	}
 
-	var customers []models.Customer
+	var customers []models.CustomerData
 
 	for rows.Next(){
-		var cus models.Customer
+		var cus models.CustomerData
 
-		err:=rows.Scan(&cus.Id,&cus.Name,&cus.Place,&cus.Age,&cus.Occupation,&cus.Balance)
+		err:=rows.Scan(&cus.Userid,&cus.Name,&cus.Email,&cus.Phone,&cus.Place,&cus.Dob,&cus.Occupation)
 
 		if err!=nil{
 			log.Fatalf("error while loading each row - %v",err)
@@ -116,7 +116,7 @@ func DeleteCustomer(w http.ResponseWriter,r *http.Request){
 
 	todel,_:=strconv.Atoi(param["id"])
 
-	statement:="DELETE FROM customer WHERE id=$1"
+	statement:="DELETE FROM customer WHERE user_id=$1"
 
 	res,err:=db.Exec(statement,todel)
 
@@ -137,13 +137,13 @@ func UpdateCustomer(w http.ResponseWriter,r *http.Request){
 	db:=ConnectDB()
 	defer db.Close()
 
-	var cus models.Customer
+	var cus models.CustomerData
 
 	json.NewDecoder(r.Body).Decode(&cus)
 
-	statement:="UPDATE customer SET name=$2, place=$3, age=$4, occupation=$5, balance=$6 WHERE id=$1"
+	statement:="UPDATE customer SET name=$2  WHERE user_id=$1"
 
-	row,err:=db.Exec(statement,cus.Id,cus.Name,cus.Place,cus.Age,cus.Occupation,cus.Balance)
+	row,err:=db.Exec(statement,cus.Userid,cus.Name)
 
 	if err!=nil{
 		log.Fatalf("error while executing query -%v",err)
