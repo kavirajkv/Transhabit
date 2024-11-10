@@ -2,17 +2,19 @@ FROM golang:1.22 AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum .
+COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -o transhabit
+RUN CGO_ENABLED=0 GOOS=linux go build -o /transhabit
+
 
 FROM alpine:latest
-WORKDIR /root/
-COPY --from=builder /app/ .
 
-RUN chmod +x transhabit
+WORKDIR /
+COPY --from=builder /transhabit /transhabit
 
 EXPOSE 8000
-CMD ["./transhabit"]
+
+ENTRYPOINT ["/transhabit"]
+
